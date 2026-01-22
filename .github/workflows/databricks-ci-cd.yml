@@ -1,33 +1,30 @@
-name: Databricks CI/CD Pipeline
+name: Databricks Notebook Deployment
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Install Databricks CLI
-      run: |
-        pip install databricks-cli
+      - name: Install Databricks CLI
+        run: |
+          pip install databricks-cli
 
-    - name: Configure Databricks CLI
-      run: |
-        databricks configure --token <<EOF
-        ${{ secrets.DATABRICKS_HOST }}
-        ${{ secrets.DATABRICKS_TOKEN }}
-        EOF
+      - name: Configure Databricks CLI
+        run: |
+          databricks configure --token <<EOF
+          ${{ secrets.DATABRICKS_HOST }}
+          ${{ secrets.DATABRICKS_TOKEN }}
+          EOF
 
-    - name: Import notebooks to Databricks Repos
-      run: |
-        databricks workspace import_dir notebooks /Repos/retailer-sales-databricks/notebooks -o
-
-    - name: Deploy Databricks Job
-      run: |
-        databricks jobs create --json-file jobs/retailer_pipeline_job.json
+      - name: Deploy ETL notebooks to Databricks Workspace (Shared)
+        run: |
+          databricks workspace import_dir ETL /Shared/Retail/ETL -o
